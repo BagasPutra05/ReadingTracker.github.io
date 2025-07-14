@@ -1,0 +1,199 @@
+/* General Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Lapisan latar belakang gelap yang menutupi seluruh layar */
+.modal-overlay {
+    /* Menjadikannya lapisan overlay di atas segalanya */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000; /* Memastikan posisinya paling depan */
+
+    /* Menyembunyikannya secara default */
+    display: none;
+
+    /* Menengahkan kotak putih di dalamnya */
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Aturan ini akan membuatnya TAMPIL saat JavaScript menambahkan class '.active' */
+.modal-overlay.active {
+    display: flex;
+}
+
+/* Kotak putih di tengah (konten modal) */
+.modal-content {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* App Container */
+#app-container {
+    width: 100%;
+    max-width: 800px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* User Profile Card */
+.user-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.level-info {
+    font-size: 1.2em;
+    color: #555;
+    margin: 10px 0;
+}
+
+.xp-bar {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.xp-bar-fill {
+    height: 100%;
+    background-color: #4caf50;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.xp-text {
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* BARU: Styling untuk Poin Musim */
+.season-points {
+    font-size: 1.1em;
+    color: #007bff;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* Add Book Card & Settings Card */
+.add-book-card, .settings-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* BARU: Styling untuk tombol reset */
+#reset-season-button {
+    background-color: #e74c3c;
+}
+#reset-season-button:hover {
+    background-color: #c0392b;
+}
+
+input[type="text"] {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Bookshelf & Book Card */
+#bookshelf {
+    display: grid;
+    gap: 20px;
+}
+
+.book-item {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.book-item.reading {
+    border-left: 5px solid #ffa500;
+}
+
+.book-item h3 {
+    margin-top: 0;
+}
+
+.reading-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 15px 0;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.reading-controls {
+    display: flex;
+    gap: 10px;
+}
+.settings-card .delete-btn {
+    background-color: #95a5a6; /* Warna abu-abu netral */
+    margin-top: 10px; /* Memberi sedikit jarak dari tombol di atasnya */
+}
+
+.settings-card .delete-btn:hover {
+    background-color: #7f8c8d; /* Warna lebih gelap saat hover */
+}

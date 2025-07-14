@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XP Reading Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="welcome-screen" class="modal-overlay active">
+    <div class="modal-content">
+        <h1>Selamat Datang di Reading Tracker</h1>
+        <p>Masukkan nama Anda untuk memulai:</p>
+        <input type="text" id="username-input" placeholder="Nama Anda...">
+        <button id="start-button">Mulai Petualangan</button>
+    </div>
+</div>
+
+<div id="app-container" class="hidden">
+    <header>
+        <div id="user-profile" class="user-card">
+            <h2 id="display-name"></h2>
+            <div class="level-info">
+                <span id="icon-name"></span><span id="level-name"></span> (Level <span id="current-level"></span>)
+            </div>
+            <div class="xp-bar">
+                <div id="xp-progress" class="xp-bar-fill"></div>
+            </div>
+            <div class="xp-text">XP: <span id="current-xp">0</span> / <span id="xp-to-next-level">100</span></div>
+            <div class="season-points">🏆 Poin Musim: <span id="season-points">0</span></div>
+        </div>
+    </header>
+
+    <main>
+        <div class="add-book-card">
+            <h3>Tambah Buku Baru</h3>
+            <input type="text" id="book-title-input" placeholder="Masukkan judul buku...">
+            <button id="add-book-button">Tambah ke Rak</button>
+        </div>
+
+        <div class="settings-card">
+            <h3>Pengaturan Musim & User</h3>
+            <p>Musim akan direset setiap 3 bulan. Anda juga bisa mereset secara manual.</p>
+            <button id="reset-season-button">Reset Musim Sekarang</button>
+            <button id="delete-user-button" class="delete-btn">Hapus User & Reset Semua</button>
+        </div>
+
+        <div id="bookshelf">
+        </div>
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
