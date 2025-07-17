@@ -197,3 +197,77 @@ button:disabled {
 .settings-card .delete-btn:hover {
     background-color: #7f8c8d; /* Warna lebih gelap saat hover */
 }
+
+.missions-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+    margin-bottom: 20px;
+}
+
+.missions-card h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #333;
+}
+
+.missions-card h4 {
+    color: #555;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 8px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.mission-card ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.mission-item {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.mission-item.completed {
+    background-color: #e8f5e9;
+    border-left: 5px solid #4caf50;
+    text-decoration: line-through;
+}
+
+.mission-item .reward {
+    font-weight: bold;
+    color: #007bff;
+    background-color: #e7f3ff;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.mission-item.completed .reward {
+    background-color: #a5d6a7;
+    color: #1b5e20;
+}
+
+.delete-book-btn {
+    background-color: #e74c3c; /* Merah */
+    color: white;
+    margin-left: auto; /* Mendorong tombol ke paling kanan */
+}
+
+.delete-book-btn:hover {
+    background-color: #c0392b; /* Merah lebih gelap saat hover */
+}

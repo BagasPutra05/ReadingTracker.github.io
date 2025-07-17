@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetSeasonButton = document.getElementById('reset-season-button');
     const deleteUserButton = document.getElementById('delete-user-button'); // BARU
 
+    // DOM Elements for Mission
+    const dailyMissionsList = document.getElementById('daily-missions-list');
+    const weeklyMissionsList = document.getElementById('weekly-missions-list');
+    const dailyTimerEl = document.getElementById('daily-timer');
+    const weeklyTimerEl = document.getElementById('weekly-timer');
+
     // User Profile UI
     const displayName = document.getElementById('display-name');
     const levelNameEl = document.getElementById('level-name');
@@ -34,12 +40,40 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Grand Bibliophile", xpToNext: Infinity, point: 7000, icon: "🏰"}
     ];
 
+    // Mission System Configuration
+    const ALL_MISSIONS = {
+        daily: [
+            { id: 'read_15_min', text: "Baca buku selama 15 menit", goal: 900, reward: 50 }, // 900 detik
+            { id: 'read_10_pages', text: "Baca 10 halaman", goal: 10, reward: 75 },
+            { id: 'add_new_book', text: "Tambahkan 1 buku baru", goal: 1, reward: 100 }
+        ],
+        weekly: [
+            { id: 'read_120_min', text: "Baca total selama 2 jam", goal: 7200, reward: 300 }, // 7200 detik
+            { id: 'read_100_pages', text: "Baca total 100 halaman", goal: 100, reward: 400 },
+            { id: 'finish_a_book', text: "Selesaikan membaca 1 buku", goal: 1, reward: 500 } // Note: This one needs special logic
+        ]
+    };
+
     let user = {
         name: '',
         level: 0,
         xp: 0,
         seasonPoints: 0,
-        seasonStartDate: null
+        seasonStartDate: null,
+        missions: {
+            daily: [],
+            weekly: []
+        },
+        lastDailyReset: null,
+        lastWeeklyReset: null,
+        stats: { // To track progress towards goals
+            dailyTimeRead: 0,
+            dailyPagesRead: 0,
+            dailyBooksAdded: 0,
+            weeklyTimeRead: 0,
+            weeklyPagesRead: 0,
+            weeklyBooksFinished: 0
+        }
     };
 
     let books = [];
@@ -54,10 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Logika ini secara otomatis menangani login persisten
         if (savedUser && savedUser.name) {
-            user = { ...user, ...savedUser };
+            user = { ...user, ...savedUser, stats: {...user.stats, ...savedUser.stats }, missions: {...user.missions, ...savedUser.missions} };
             books = savedBooks || [];
 
             checkAndHandleSeasonReset();
+            checkAndResetMissions();
 
             showApp();
             renderBooks();
@@ -165,17 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
             bookEl.dataset.index = index;
 
             bookEl.innerHTML = `
-                <h3>${book.title}</h3>
-                <div class="reading-stats">
-                    <span class="timer">Waktu: ${formatTime(book.timeRead)}</span>
-                    <span class="pages">Halaman: ${book.pagesRead}</span>
-                </div>
-                <div class="reading-controls">
-                    <button class="start-reading-btn">Mulai Membaca</button>
-                    <button class="stop-reading-btn" disabled>Berhenti</button>
-                    <button class="add-page-btn" disabled>+1 Halaman</button>
-                </div>
-            `;
+            <h3>${book.title}</h3>
+            <div class="reading-stats">
+                <span class="timer">Waktu: ${formatTime(book.timeRead)}</span>
+                <span class="pages">Halaman: ${book.pagesRead}</span>
+            </div>
+            <div class="reading-controls">
+                <button class="start-reading-btn">Mulai Membaca</button>
+                <button class="stop-reading-btn" disabled>Berhenti</button>
+                <button class="add-page-btn" disabled>+1 Halaman</button>
+                <button class="delete-book-btn">Hapus</button> 
+            </div>
+        `;
             bookshelf.appendChild(bookEl);
         });
     }
@@ -191,6 +227,121 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('readingTrackerUser', JSON.stringify(user));
         localStorage.setItem('readingTrackerBooks', JSON.stringify(books));
     }
+
+    // --- MISSION FUNCTIONS ---
+
+    function checkAndResetMissions() {
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const startOfWeek = new Date(startOfToday - (now.getDay() * 24 * 60 * 60 * 1000)).getTime();
+
+        if (!user.lastDailyReset || user.lastDailyReset < startOfToday) {
+            console.log("Resetting daily missions...");
+            user.lastDailyReset = startOfToday;
+            user.stats.dailyTimeRead = 0;
+            user.stats.dailyPagesRead = 0;
+            user.stats.dailyBooksAdded = 0;
+            user.missions.daily = selectRandomMissions('daily', 2); // Get 2 random daily missions
+            alert("Misi harian baru telah tersedia!");
+        }
+
+        if (!user.lastWeeklyReset || user.lastWeeklyReset < startOfWeek) {
+            console.log("Resetting weekly missions...");
+            user.lastWeeklyReset = startOfWeek;
+            user.stats.weeklyTimeRead = 0;
+            user.stats.weeklyPagesRead = 0;
+            user.stats.weeklyBooksFinished = 0;
+            user.missions.weekly = selectRandomMissions('weekly', 2); // Get 2 random weekly missions
+            alert("Misi mingguan baru telah tersedia!");
+        }
+        renderMissions();
+        startMissionTimers();
+        saveData();
+    }
+
+    function selectRandomMissions(type, count) {
+        const missionsSource = ALL_MISSIONS[type].slice(0); // Create a copy
+        const selectedMissions = [];
+        for (let i = 0; i < count && missionsSource.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * missionsSource.length);
+            const mission = missionsSource.splice(randomIndex, 1)[0];
+            selectedMissions.push({
+                id: mission.id,
+                text: mission.text,
+                goal: mission.goal,
+                reward: mission.reward,
+                progress: 0,
+                completed: false
+            });
+        }
+        return selectedMissions;
+    }
+
+    function renderMissions() {
+        dailyMissionsList.innerHTML = '';
+        user.missions.daily.forEach(mission => {
+            dailyMissionsList.innerHTML += createMissionHTML(mission);
+        });
+
+        weeklyMissionsList.innerHTML = '';
+        user.missions.weekly.forEach(mission => {
+            weeklyMissionsList.innerHTML += createMissionHTML(mission);
+        });
+    }
+
+    function createMissionHTML(mission) {
+        const progress = Math.min(mission.progress, mission.goal);
+        return `
+        <li class="mission-item ${mission.completed ? 'completed' : ''}" data-id="${mission.id}">
+            <span>${mission.text} (${progress} / ${mission.goal})</span>
+            <span class="reward">+${mission.reward} XP</span>
+        </li>
+    `;
+    }
+
+    function updateMissionProgress(action, value) {
+        const missionsToCheck = [...user.missions.daily, ...user.missions.weekly];
+
+        missionsToCheck.forEach(mission => {
+            if (mission.completed) return;
+
+            let missionNeedsUpdate = false;
+            if (action === 'read_time' && (mission.id === 'read_15_min' || mission.id === 'read_120_min')) {
+                mission.progress += value;
+                missionNeedsUpdate = true;
+            } else if (action === 'read_pages' && (mission.id === 'read_10_pages' || mission.id === 'read_100_pages')) {
+                mission.progress += value;
+                missionNeedsUpdate = true;
+            } else if (action === 'add_book' && mission.id === 'add_new_book') {
+                mission.progress += value;
+                missionNeedsUpdate = true;
+            }
+
+            if (missionNeedsUpdate && mission.progress >= mission.goal) {
+                mission.completed = true;
+                addXp(mission.reward);
+                alert(`Misi Selesai: "${mission.text}"! Anda mendapatkan +${mission.reward} XP.`);
+            }
+        });
+
+        renderMissions();
+        saveData();
+    }
+
+    function startMissionTimers() {
+        setInterval(() => {
+            const now = new Date();
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            const dailyRemaining = endOfToday - now;
+            dailyTimerEl.textContent = `(Reset dalam: ${formatTime(Math.floor(dailyRemaining / 1000))})`;
+
+            const endOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - now.getDay()), 0, 0, 0);
+            const weeklyRemaining = endOfWeek - now;
+            weeklyTimerEl.textContent = `(Reset dalam: ${Math.floor(weeklyRemaining / (1000 * 60 * 60 * 24))} hari ${new Date(weeklyRemaining).getUTCHours()} jam)`;
+        }, 1000);
+    }
+
+
 
     // --- EVENT LISTENERS ---
 
@@ -232,6 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             alert("Buku berhasil ditambahkan! Anda mendapatkan bonus +100 XP.");
             addXp(100);
+            updateMissionProgress('add_book', 1);
 
             renderBooks();
             saveData();
@@ -259,12 +411,34 @@ document.addEventListener('DOMContentLoaded', () => {
             readingInterval = setInterval(() => {
                 book.timeRead++;
                 bookEl.querySelector('.timer').textContent = `Waktu: ${formatTime(book.timeRead)}`;
+                updateMissionProgress('read_time', 1);
                 saveData();
             }, 1000);
 
             xpInterval = setInterval(() => {
                 addXp(1);
             }, 10000);
+        }
+        if (e.target.classList.contains('delete-book-btn')) {
+            const confirmation = confirm(`Apakah Anda yakin ingin menghapus buku "${book.title}" dari rak Anda?`);
+            if (confirmation) {
+                // Hentikan interval jika buku yang dihapus sedang dibaca
+                if (bookEl.classList.contains('reading')) {
+                    clearInterval(readingInterval);
+                    clearInterval(xpInterval);
+                    readingInterval = null;
+                    xpInterval = null;
+                }
+
+                // Hapus buku dari array
+                books.splice(bookIndex, 1);
+
+                // Simpan data dan render ulang rak buku
+                saveData();
+                renderBooks();
+
+                alert(`Buku "${book.title}" telah dihapus.`);
+            }
         }
 
         if (e.target.classList.contains('stop-reading-btn')) {
@@ -283,6 +457,8 @@ document.addEventListener('DOMContentLoaded', () => {
             book.pagesRead++;
             bookEl.querySelector('.pages').textContent = `Halaman: ${book.pagesRead}`;
             addXp(1);
+
+            updateMissionProgress('read_pages', 1);
 
             if (book.pagesRead > 300 && !book.pageBonusAwarded) {
                 book.pageBonusAwarded = true;
