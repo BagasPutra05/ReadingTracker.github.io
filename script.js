@@ -138,8 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function performSeasonReset() {
         const rankInfo = LEVELS[user.level];
-        const pointsEarned = rankInfo.points;
-        user.seasonPoints += pointsEarned;
+        const pointsEarned = rankInfo.point;
+
+        // FIX: Pastikan user.seasonPoints adalah angka sebelum melakukan penambahan
+        user.seasonPoints = (user.seasonPoints || 0) + pointsEarned;
 
         alert(`Selamat! Anda menyelesaikan musim sebagai ${rankInfo.name} (Level ${user.level + 1}) dan mendapatkan ${pointsEarned} Poin Musim.`);
 
@@ -206,6 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const finishedMark = book.isFinished ? '✓' : '';
             const disabledState = book.isFinished ? 'disabled' : '';
+
+            const totalPagesDisplay = book.totalPages ? `/ ${book.totalPages}` : '';
 
             bookEl.innerHTML = `
             <h3>${book.title} ${finishedMark}</h3>
@@ -475,10 +479,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (book.isFinished) return;
 
             book.pagesRead++;
-            bookEl.querySelector('.pages').textContent = `Halaman: ${book.pagesRead}`;
             addXp(1);
-
             updateMissionProgress('read_pages', 1);
+
+            const totalPagesDisplay = book.totalPages? `/ ${book.totalPages}` : '';
+            bookEl.querySelector('.pages').textContent = `Halaman: ${book.pagesRead} ${totalPagesDisplay}`;
+
 
             if (book.pagesRead > 300 && !book.pageBonusAwarded) {
                 book.pageBonusAwarded = true;
@@ -486,12 +492,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 addXp(300);
             }
 
-            if (book.pagesRead >= book.totalPages) {
+            if (book.totalPages && book.pagesRead >= book.totalPages) {
                 book.isFinished = true;
                 book.pagesRead = book.totalPages;
 
                 alert(`🎉 Selamat! Anda telah menyelesaikan buku ${book.title}`)
-                updateMissionProgress('finish_book', 1)
+                updateMissionProgress('finish_book', 1);
+
+                // Jika buku sedang dibaca saat selesai, hentikan timernya.
+                if (bookEl.classList.contains('reading')) {
+                    clearInterval(readingInterval);
+                    clearInterval(xpInterval);
+                    readingInterval = null;
+                    xpInterval = null;
+                }
+
+                // Panggil renderBooks HANYA saat buku selesai untuk mengunci UI
+                renderBooks()
             }
 
             saveData();
