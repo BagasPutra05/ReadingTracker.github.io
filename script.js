@@ -510,9 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Panggil renderBooks HANYA saat buku selesai untuk mengunci UI
                 renderBooks()
             }
-
             saveData();
-            renderBooks();
         }
     });
 
