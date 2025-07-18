@@ -6,9 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameInput = document.getElementById('username-input');
     const addBookButton = document.getElementById('add-book-button');
     const bookTitleInput = document.getElementById('book-title-input');
+    const bookPagesInput = document.getElementById('book-pages-input');
     const bookshelf = document.getElementById('bookshelf');
     const resetSeasonButton = document.getElementById('reset-season-button');
     const deleteUserButton = document.getElementById('delete-user-button'); // BARU
+
 
     // DOM Elements for Mission
     const dailyMissionsList = document.getElementById('daily-missions-list');
@@ -197,18 +199,24 @@ document.addEventListener('DOMContentLoaded', () => {
         books.forEach((book, index) => {
             const bookEl = document.createElement('div');
             bookEl.classList.add('book-item');
+            if (book.isFinished) {
+                bookEl.classList.add('finished')
+            }
             bookEl.dataset.index = index;
 
+            const finishedMark = book.isFinished ? '✓' : '';
+            const disabledState = book.isFinished ? 'disabled' : '';
+
             bookEl.innerHTML = `
-            <h3>${book.title}</h3>
+            <h3>${book.title} ${finishedMark}</h3>
             <div class="reading-stats">
                 <span class="timer">Waktu: ${formatTime(book.timeRead)}</span>
-                <span class="pages">Halaman: ${book.pagesRead}</span>
+                <span class="pages">Halaman: ${book.pagesRead} / ${book.totalPages}</span>
             </div>
             <div class="reading-controls">
-                <button class="start-reading-btn">Mulai Membaca</button>
+                <button class="start-reading-btn" ${disabledState}>Mulai Membaca</button>
                 <button class="stop-reading-btn" disabled>Berhenti</button>
-                <button class="add-page-btn" disabled>+1 Halaman</button>
+                <button class="add-page-btn" ${disabledState}>+1 Halaman</button>
                 <button class="delete-book-btn">Hapus</button> 
             </div>
         `;
@@ -306,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mission.completed) return;
 
             let missionNeedsUpdate = false;
+
             if (action === 'read_time' && (mission.id === 'read_15_min' || mission.id === 'read_120_min')) {
                 mission.progress += value;
                 missionNeedsUpdate = true;
@@ -313,6 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 mission.progress += value;
                 missionNeedsUpdate = true;
             } else if (action === 'add_book' && mission.id === 'add_new_book') {
+                mission.progress += value;
+                missionNeedsUpdate = true;
+            } else if (action === 'finish_book' && mission.id === 'finish_a_book') {
                 mission.progress += value;
                 missionNeedsUpdate = true;
             }
@@ -372,14 +384,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addBookButton.addEventListener('click', () => {
         const title = bookTitleInput.value.trim();
-        if (title) {
+        const totalPages = parseInt(bookPagesInput.value, 10);
+        if (title && totalPages > 0) {
             books.push({
                 title: title,
                 timeRead: 0,
                 pagesRead: 0,
-                pageBonusAwarded: false
+                totalPages: totalPages,
+                pageBonusAwarded: false,
+                isFinished: false,
             });
             bookTitleInput.value = '';
+            bookPagesInput.value = '';
 
             alert("Buku berhasil ditambahkan! Anda mendapatkan bonus +100 XP.");
             addXp(100);
@@ -387,6 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderBooks();
             saveData();
+        } else {
+            alert("Mohon masukkan judul dan jumlah halaman yang valid");
         }
     });
 
@@ -454,6 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (e.target.classList.contains('add-page-btn')) {
+            if (book.isFinished) return;
+
             book.pagesRead++;
             bookEl.querySelector('.pages').textContent = `Halaman: ${book.pagesRead}`;
             addXp(1);
@@ -465,6 +485,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(`Luar biasa! Anda telah membaca lebih dari 300 halaman di buku ini! Bonus +300 XP.`);
                 addXp(300);
             }
+
+            if (book.pagesRead >= book.totalPages) {
+                book.isFinished = true;
+                book.pagesRead = book.totalPages;
+
+                alert(`🎉 Selamat! Anda telah menyelesaikan buku ${book.title}`)
+                updateMissionProgress('finish_book', 1)
+            }
+
+            saveData();
+            renderBooks();
         }
     });
 
