@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="main-title">📚 Reading Tracker</h1>
+            <div class="stats-summary">
+                <div class="level-section">
+                    <div class="level-info">
+                        <span class="level-number" id="user-level">1</span>
+                        <span class="level-name" id="level-name">Bookworm Beginner</span>
+                    </div>
+                    <div class="level-progress">
+                        <div class="level-bar">
+                            <div class="level-fill" id="level-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="level-text">
+                            <span id="current-points">0</span> / <span id="next-level-points">100</span> points
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-item" style="padding-inline: 20px;">
+                    <span class="stat-label">Total Reading Time:</span>
+                    <span id="total-time" class="stat-value">0h 0m</span>
+                </div>
+                <div class="stat-item" style="padding-inline: 20px;">
+                    <span class="stat-label">Books Completed:</span>
+                    <span id="books-completed" class="stat-value">0</span>
+                </div>
+                <div class="stat-item" style="padding-inline: 20px;">
+                    <span class="stat-label">Season Ends In:</span>
+                    <span id="season-countdown" class="stat-value">Calculating...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="add-book-section">
+            <h2>Add New Book</h2>
+            <form id="add-book-form" class="add-book-form">
+                <div class="form-group">
+                    <label for="book-title">Book Title</label>
+                    <input type="text" id="book-title" name="title" required placeholder="Enter book title">
+                </div>
+                <div class="form-group">
+                    <label for="total-pages">Total Pages</label>
+                    <input type="number" id="total-pages" name="totalPages" min="1" required placeholder="Enter total pages">
+                </div>
+                <button type="submit" class="btn btn-primary">Add Book</button>
+            </form>
+        </section>
+
+        <section class="book-list-section">
+            <h2>My Reading List</h2>
+            <div id="book-list" class="book-list">
+                </div>
+        </section>
+    </main>
+
+    <div id="timer-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-book-title">Reading Session</h3>
+                <button id="close-modal" class="btn-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="timer-display">
+                    <span id="timer-text">00:00:00</span>
+                </div>
+                <div class="timer-controls">
+                    <button id="pause-resume-btn" class="btn btn-secondary">Pause</button>
+                    <button id="stop-session-btn" class="btn btn-danger">Stop Session</button>
+                </div>
+                <div id="page-input-section" class="page-input-section hidden">
+                    <label for="current-page">Current Page:</label>
+                    <input type="number" id="current-page" min="0" placeholder="Enter current page">
+                    <button id="save-progress-btn" class="btn btn-primary">Save Progress</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
