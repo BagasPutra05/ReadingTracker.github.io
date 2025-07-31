@@ -559,3 +559,271 @@ body {
         font-size: 2rem;
     }
 }
+
+/* ======================== */
+/* TAMBAHAN UNTUK FITUR BARU */
+/* ======================== */
+
+/* Navigasi Utama */
+.main-nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: #4a5568;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #667eea;
+}
+
+.nav-link.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+/* Koin Pengguna di Header */
+#user-coins {
+    color: #DAA520; /* Warna Emas */
+    font-weight: 700;
+}
+
+/* Kontainer Utama & Tampilan Halaman */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.view {
+    padding-top: 2rem;
+}
+
+.page-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.page-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Halaman Misi */
+.mission-category {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.mission-category h3 {
+    color: white;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mission-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.mission-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.mission-card.claimed {
+    opacity: 0.6;
+    background: rgba(230, 240, 230, 0.9);
+}
+
+.mission-info p {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+}
+
+.mission-reward {
+    font-size: 0.85rem;
+    color: #38a169;
+    font-weight: 500;
+}
+
+.mission-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 150px;
+}
+
+.mission-progress .progress-bar {
+    width: 100%;
+}
+
+.mission-progress span {
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+.claim-mission-btn:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+}
+
+/* Halaman Pencapaian */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.achievement-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.achievement-card.unlocked {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #667eea;
+}
+
+.achievement-icon {
+    font-size: 3rem;
+}
+
+.achievement-details h4 {
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+}
+
+.achievement-details p {
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+/* Halaman Toko */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.shop-item-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.shop-item-card h4 {
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.shop-item-card p {
+    font-size: 0.9rem;
+    color: #718096;
+    flex-grow: 1;
+    margin-bottom: 1rem;
+}
+
+.shop-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+}
+
+.item-cost {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #DAA520;
+}
+
+.buy-item-btn:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+}
+
+
+/* Halaman Profil */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.profile-stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.profile-stat-card h4 {
+    color: #718096;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+}
+
+.profile-stat-card p {
+    color: #4a5568;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+
+/* Notifikasi */
+.level-notification {
+    position: fixed; 
+    top: 20px; 
+    right: 20px; 
+    background: linear-gradient(135deg, #667eea, #764ba2); 
+    color: white; 
+    padding: 1rem 1.5rem; 
+    border-radius: 12px; 
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); 
+    z-index: 10000; 
+    font-weight: 600; 
+    font-size: 1rem; 
+    max-width: 300px; 
+    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s;
+}
+
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } 
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }

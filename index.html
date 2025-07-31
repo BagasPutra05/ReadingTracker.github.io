@@ -10,7 +10,18 @@
     <header class="header">
         <div class="header-content">
             <h1 class="main-title">📚 Reading Tracker</h1>
+            <nav id="main-nav" class="main-nav">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#missions" class="nav-link">Missions</a>
+                <a href="#achievements" class="nav-link">Achievements</a>
+                <a href="#shop" class="nav-link">Shop</a>
+                <a href="#profile" class="nav-link">Profile</a>
+            </nav>
             <div class="stats-summary">
+                 <div class="stat-item">
+                    <span class="stat-label">Coins</span>
+                    <span id="user-coins" class="stat-value"> 0</span>
+                </div>
                 <div class="level-section">
                     <div class="level-info">
                         <span class="level-number" id="user-level">1</span>
@@ -25,43 +36,66 @@
                         </div>
                     </div>
                 </div>
-                <div class="stat-item" style="padding-inline: 20px;">
-                    <span class="stat-label">Total Reading Time:</span>
-                    <span id="total-time" class="stat-value">0h 0m</span>
-                </div>
-                <div class="stat-item" style="padding-inline: 20px;">
-                    <span class="stat-label">Books Completed:</span>
-                    <span id="books-completed" class="stat-value">0</span>
-                </div>
-                <div class="stat-item" style="padding-inline: 20px;">
-                    <span class="stat-label">Season Ends In:</span>
-                    <span id="season-countdown" class="stat-value">Calculating...</span>
-                </div>
             </div>
         </div>
     </header>
 
-    <main class="main-content">
-        <section class="add-book-section">
-            <h2>Add New Book</h2>
-            <form id="add-book-form" class="add-book-form">
-                <div class="form-group">
-                    <label for="book-title">Book Title</label>
-                    <input type="text" id="book-title" name="title" required placeholder="Enter book title">
-                </div>
-                <div class="form-group">
-                    <label for="total-pages">Total Pages</label>
-                    <input type="number" id="total-pages" name="totalPages" min="1" required placeholder="Enter total pages">
-                </div>
-                <button type="submit" class="btn btn-primary">Add Book</button>
-            </form>
-        </section>
+    <main class="main-container">
+        <div id="home-view" class="view active">
+            <div class="main-content">
+                <section class="add-book-section">
+                    <h2>Add New Book</h2>
+                    <form id="add-book-form" class="add-book-form">
+                        <div class="form-group">
+                            <label for="book-title">Book Title</label>
+                            <input type="text" id="book-title" name="title" required placeholder="Enter book title">
+                        </div>
+                        <div class="form-group">
+                            <label for="total-pages">Total Pages</label>
+                            <input type="number" id="total-pages" name="totalPages" min="1" required placeholder="Enter total pages">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Book</button>
+                    </form>
+                </section>
+                <section class="book-list-section">
+                    <h2>My Reading List</h2>
+                    <div id="book-list" class="book-list"></div>
+                </section>
+            </div>
+        </div>
 
-        <section class="book-list-section">
-            <h2>My Reading List</h2>
-            <div id="book-list" class="book-list">
-                </div>
-        </section>
+        <div id="missions-view" class="view hidden">
+            <div class="page-header">
+                <h2>Missions</h2>
+                <p>Complete missions to earn extra points and rewards!</p>
+            </div>
+            <div id="missions-content"></div>
+        </div>
+
+        <div id="achievements-view" class="view hidden">
+            <div class="page-header">
+                <h2>Achievements</h2>
+                <p>Unlock achievements by reaching reading milestones.</p>
+            </div>
+            <div id="achievements-content" class="achievements-grid"></div>
+        </div>
+
+        <div id="shop-view" class="view hidden">
+            <div class="page-header">
+                <h2>Booster Shop</h2>
+                <p>Use your coins to buy boosters and accelerate your progress.</p>
+            </div>
+            <div id="shop-content" class="shop-grid"></div>
+        </div>
+
+        <div id="profile-view" class="view hidden">
+            <div class="page-header">
+                <h2>User Profile</h2>
+                <p>Your complete reading statistics.</p>
+            </div>
+            <div id="profile-content"></div>
+        </div>
+
     </main>
 
     <div id="timer-modal" class="modal hidden">
