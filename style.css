@@ -836,3 +836,7 @@ body {
 #login-modal .modal-backdrop {
     pointer-events: none;
 }
+
+#username-input {
+    margin-top: 10px;
+}
