@@ -301,6 +301,7 @@ body {
 .btn-primary {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
+    margin-top: 10px;
 }
 
 .btn-primary:hover {
