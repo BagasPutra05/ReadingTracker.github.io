@@ -827,3 +827,12 @@ body {
 
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } 
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+.app-hidden {
+    display: none !important;
+}
+
+/* Pastikan modal login tidak bisa ditutup dengan klik di luar */
+#login-modal .modal-backdrop {
+    pointer-events: none;
+}

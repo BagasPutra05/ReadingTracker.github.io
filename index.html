@@ -22,6 +22,10 @@
                     <span class="stat-label">Coins</span>
                     <span id="user-coins" class="stat-value"> 0</span>
                 </div>
+                 <div class="stat-item">
+                    <span class="stat-label">Profile Name</span>
+                    <span id="current-user-display" class="stat-value" style="font-size: 1.2rem; color: #667eea;"> 0</span>
+                </div>
                 <div class="level-section">
                     <div class="level-info">
                         <span class="level-number" id="user-level">1</span>
@@ -118,6 +122,27 @@
                     <input type="number" id="current-page" min="0" placeholder="Enter current page">
                     <button id="save-progress-btn" class="btn btn-primary">Save Progress</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="modal">
+        <div class="modal-backdrop" style="background: rgba(0, 0, 0, 0.8);"></div>
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                <h3>Welcome to Reading Tracker</h3>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; margin-bottom: 1.5rem; color: #202020;">
+                    Please enter your name to load or start a new profile.
+                </p>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username-input">Your Name</label>
+                        <input type="text" id="username-input" required placeholder="Sapi Mengeong">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Continue</button>
+                </form>
             </div>
         </div>
     </div>

@@ -14,50 +14,48 @@ const firebaseConfig = {
   
 const app = firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-const userId = 'user-utama'; 
-const userRef = database.ref('users/' + userId);
+
+// Variabel pengguna sekarang dinamis, tidak lagi statis
+let userRef = null;
+let currentUsername = null;
 
 // =================================================================
-// BAGIAN 2: GLOBAL STATE & DEFINISI DATA BARU
+// BAGIAN 2: GLOBAL STATE & DEFINISI DATA
 // =================================================================
 let books = [];
-let userStats = {}; // Akan diisi dari Firebase atau state default
-let missions = {}; // Akan diisi dari Firebase atau state default
-let achievements = {}; // Akan diisi dari Firebase atau state default
+let userStats = {}; 
+let missions = {}; 
+let achievements = {}; 
 
 const defaultState = {
     userStats: {
-        totalPoints: 0,
-        level: 1,
-        booksCompleted: 0,
-        totalReadingTime: 0,
-        coins: 0,
-        seasonStartDate: new Date().toISOString(),
-        activeBoosters: [], // contoh: [{id: 'double_points', expires: timestamp}]
+        totalPoints: 0, level: 1, booksCompleted: 0, totalReadingTime: 0,
+        coins: 0, seasonStartDate: new Date().toISOString(), activeBoosters: [],
     },
     missions: {
         daily: { lastReset: new Date().toISOString(), list: [] },
         weekly: { lastReset: new Date().toISOString(), list: [] }
     },
     achievements: {
-        read_1_book: { unlocked: false },
-        read_10_books: { unlocked: false },
-        read_100_hours: { unlocked: false },
-        reach_level_10: { unlocked: false },
+        read_1_book: { unlocked: false }, read_10_books: { unlocked: false },
+        read_100_hours: { unlocked: false }, reach_level_10: { unlocked: false },
         complete_50_missions: { unlocked: false },
     }
 };
 
 let currentSession = {
-    bookId: null,
-    startTime: null,
-    elapsedTime: 0,
-    isRunning: false,
-    intervalId: null,
-    sessionPoints: 0
+    bookId: null, startTime: null, elapsedTime: 0, isRunning: false,
+    intervalId: null, sessionPoints: 0
 };
 
-// DOM elements (ditambah elemen baru)
+// DOM elements (ditambah elemen baru untuk login)
+const loginModal = document.getElementById('login-modal');
+const loginForm = document.getElementById('login-form');
+const usernameInput = document.getElementById('username-input');
+const appHeader = document.querySelector('.header');
+const appMain = document.querySelector('.main-container');
+const currentUserDisplay = document.getElementById('current-user-display');
+// ... (sisa DOM elements sama)
 const mainNav = document.getElementById('main-nav');
 const views = document.querySelectorAll('.view');
 const userCoinsElement = document.getElementById('user-coins');
@@ -84,115 +82,56 @@ const shopContent = document.getElementById('shop-content');
 
 
 // =================================================================
-// BAGIAN 3: KONFIGURASI LEVEL, MISI, PENCAPAIAN, TOKO
+// BAGIAN 3: KONFIGURASI LEVEL, MISI, DLL (TIDAK BERUBAH)
 // =================================================================
-const LEVEL_NAMES = ["Bookworm Beginner", "Page Turner", "Story Seeker", "Chapter Chaser", "Novel Navigator", "Literary Learner", "Reading Rookie", "Book Browser", "Tale Tracker", "Word Warrior", "Prose Pioneer", "Fiction Fan", "Literature Lover", "Story Scholar", "Reading Ranger", "Book Buff", "Chapter Champion", "Novel Ninja", "Literary Legend", "Reading Royalty", "Manuscript Master", "Epic Explorer", "Saga Specialist", "Chronicle Conqueror", "Tome Titan", "Literary Luminary", "Reading Ruler", "Book Baron", "Story Sovereign", "Word Wizard", "Prose Prodigy", "Fiction Pharaoh", "Literary Lord", "Reading Regent", "Book Emperor", "Chapter Czar", "Novel Noble", "Story Sultan", "Word Warlord", "Literary Laureate", "Reading Virtuoso", "Book Maestro", "Story Savant", "Literary Genius", "Reading Oracle", "Book Prophet", "Story Sage", "Literary Saint", "Reading Deity", "Omnireader Supreme"];
-const POINTS_PER_LEVEL = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2200, 2400, 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 10000];
+const LEVEL_NAMES=["Bookworm Beginner","Page Turner","Story Seeker","Chapter Chaser","Novel Navigator","Literary Learner","Reading Rookie","Book Browser","Tale Tracker","Word Warrior","Prose Pioneer","Fiction Fan","Literature Lover","Story Scholar","Reading Ranger","Book Buff","Chapter Champion","Novel Ninja","Literary Legend","Reading Royalty","Manuscript Master","Epic Explorer","Saga Specialist","Chronicle Conqueror","Tome Titan","Literary Luminary","Reading Ruler","Book Baron","Story Sovereign","Word Wizard","Prose Prodigy","Fiction Pharaoh","Literary Lord","Reading Regent","Book Emperor","Chapter Czar","Novel Noble","Story Sultan","Word Warlord","Literary Laureate","Reading Virtuoso","Book Maestro","Story Savant","Literary Genius","Reading Oracle","Book Prophet","Story Sage","Literary Saint","Reading Deity","Omnireader Supreme"];
+const POINTS_PER_LEVEL=[100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800,4000,4500,5000,5500,6000,6500,7000,7500,8000,8500,9000,10000];
+const ALL_MISSIONS={daily:[{id:'read_30_min',text:'Read for 30 minutes',target:1800,type:'time',reward:25},{id:'read_1_session',text:'Complete one reading session',target:1,type:'session',reward:15},],weekly:[{id:'read_5_hours',text:'Read for 5 hours in a week',target:18000,type:'time',reward:100},{id:'finish_1_book',text:'Finish one book',target:1,type:'complete_book',reward:150},]};
+const ALL_ACHIEVEMENTS={read_1_book:{name:"First Chapter",description:"Finish your first book."},read_10_books:{name:"Book Collector",description:"Finish 10 books."},read_100_hours:{name:"Time Weaver",description:"Read for a total of 100 hours."},reach_level_10:{name:"Double Digits",description:"Reach level 10 in any season."},complete_50_missions:{name:"Taskmaster",description:"Complete 50 missions."}};
+const SHOP_ITEMS=[{id:'double_points_1hr',name:'2x Points (1 Hour)',description:'Earn double points from reading for one hour.',cost:50,action:'buyBooster',duration:3600000},{id:'bonus_100_points',name:'Instant 100 Points',description:'Get 100 points instantly.',cost:75,action:'buyInstantPoints',points:100},{id:'skip_mission',name:'Mission Skip Ticket',description:'Instantly complete one daily mission.',cost:30,action:'buyMissionSkip'}];
 
-const ALL_MISSIONS = {
-    daily: [
-        { id: 'read_30_min', text: 'Read for 30 minutes', target: 30 * 60, type: 'time', reward: 25 },
-        { id: 'read_1_session', text: 'Complete one reading session', target: 1, type: 'session', reward: 15 },
-    ],
-    weekly: [
-        { id: 'read_5_hours', text: 'Read for 5 hours in a week', target: 5 * 3600, type: 'time', reward: 100 },
-        { id: 'finish_1_book', text: 'Finish one book', target: 1, type: 'complete_book', reward: 150 },
-    ]
-};
-
-const ALL_ACHIEVEMENTS = {
-    read_1_book: { name: "First Chapter", description: "Finish your first book." },
-    read_10_books: { name: "Book Collector", description: "Finish 10 books." },
-    read_100_hours: { name: "Time Weaver", description: "Read for a total of 100 hours." },
-    reach_level_10: { name: "Double Digits", description: "Reach level 10 in any season." },
-    complete_50_missions: { name: "Taskmaster", description: "Complete 50 missions." }
-};
-
-const SHOP_ITEMS = [
-    { id: 'double_points_1hr', name: '2x Points (1 Hour)', description: 'Earn double points from reading for one hour.', cost: 50, action: 'buyBooster', duration: 3600 * 1000 },
-    { id: 'bonus_100_points', name: 'Instant 100 Points', description: 'Get 100 points instantly.', cost: 75, action: 'buyInstantPoints', points: 100 },
-    { id: 'skip_mission', name: 'Mission Skip Ticket', description: 'Instantly complete one daily mission.', cost: 30, action: 'buyMissionSkip' }
-];
 
 // =================================================================
-// BAGIAN 4: FUNGSI KALKULASI & LOGIKA INTI (DENGAN MODIFIKASI)
-// =================================================================
-function calculateLevelFromPoints(totalPoints) {
-    let level = 1;
-    let pointsUsed = 0;
-    for (let i = 0; i < POINTS_PER_LEVEL.length; i++) {
-        if (totalPoints >= pointsUsed + POINTS_PER_LEVEL[i]) {
-            pointsUsed += POINTS_PER_LEVEL[i];
-            level++;
-        } else { break; }
-    }
-    return Math.min(level, 50);
-}
-
-function getLevelInfo(totalPoints) {
-    const level = calculateLevelFromPoints(totalPoints);
-    let pointsUsedForCurrentLevel = 0;
-    for (let i = 0; i < level - 1; i++) {
-        pointsUsedForCurrentLevel += POINTS_PER_LEVEL[i] || 0;
-    }
-    const pointsForNextLevel = level < 50 ? (POINTS_PER_LEVEL[level - 1] || 0) : 0;
-    return { currentLevelStartPoints: pointsUsedForCurrentLevel, pointsForNextLevel: pointsForNextLevel };
-}
-
-// LOGIKA BARU: Reset Musim dengan Hadiah Koin
-function checkAndResetSeason() {
-    const now = new Date();
-    const seasonStartDate = new Date(userStats.seasonStartDate);
-    const monthDiff = (now.getFullYear() - seasonStartDate.getFullYear()) * 12 + (now.getMonth() - seasonStartDate.getMonth());
-    
-    if (monthDiff >= 3) {
-        const coinsEarned = userStats.level * 10; // Contoh: 10 koin per level
-        userStats.coins += coinsEarned;
-        
-        showLevelUpNotification(`A new season has begun! You earned ${coinsEarned} coins for reaching level ${userStats.level}. Your progress has been reset.`);
-        
-        // Reset stats musim
-        userStats.totalPoints = 0;
-        userStats.level = 1;
-        userStats.seasonStartDate = now.toISOString();
-        
-        saveData(); // Simpan perubahan
-    }
-}
-
-// LOGIKA BARU: Reset Misi Harian/Mingguan
-function checkAndResetMissions() {
-    const now = new Date().getTime();
-    
-    // Pastikan objek misi dan list ada sebelum diakses
-    if (!missions.daily) missions.daily = { lastReset: new Date().toISOString(), list: [] };
-    if (!missions.weekly) missions.weekly = { lastReset: new Date().toISOString(), list: [] };
-
-    const lastDailyReset = new Date(missions.daily.lastReset).getTime();
-    const lastWeeklyReset = new Date(missions.weekly.lastReset).getTime();
-
-    // Perbaikan: Tambahkan pengecekan jika list kosong (!missions.daily.list.length)
-    // Ini memastikan misi akan dibuat saat pertama kali dibuka atau setelah reset.
-    if ((now - lastDailyReset > 24 * 60 * 60 * 1000) || !missions.daily.list.length) {
-        missions.daily.list = ALL_MISSIONS.daily.map(m => ({ ...m, progress: 0, claimed: false }));
-        missions.daily.lastReset = new Date().toISOString();
-    }
-    
-    // Lakukan perbaikan yang sama untuk misi mingguan
-    if ((now - lastWeeklyReset > 7 * 24 * 60 * 60 * 1000) || !missions.weekly.list.length) {
-        missions.weekly.list = ALL_MISSIONS.weekly.map(m => ({ ...m, progress: 0, claimed: false }));
-        missions.weekly.lastReset = new Date().toISOString();
-    }
-}
-
-// =================================================================
-// BAGIAN 5: INISIALISASI APLIKASI
+// BAGIAN 4: INISIALISASI APLIKASI & LOGIKA LOGIN
 // =================================================================
 document.addEventListener('DOMContentLoaded', function() {
+    // Tampilkan modal login dan sembunyikan aplikasi utama
+    loginModal.classList.remove('hidden');
+    appHeader.classList.add('app-hidden');
+    appMain.classList.add('app-hidden');
+
+    // Tambahkan event listener untuk form login
+    loginForm.addEventListener('submit', handleLogin);
+    
+    // Setup event listener lainnya
+    setupEventListeners();
+});
+
+function handleLogin(e) {
+    e.preventDefault();
+    const username = usernameInput.value.trim();
+    if (!username) {
+        alert("Please enter a name.");
+        return;
+    }
+
+    currentUsername = username;
+    // Ubah nama menjadi kunci yang aman untuk Firebase (lowercase, tanpa karakter ilegal)
+    const sanitizedUsername = username.toLowerCase().replace(/[.#$\[\]]/g, '_');
+
+    // Set referensi database ke path pengguna yang spesifik
+    userRef = database.ref('users/' + sanitizedUsername);
+
+    // Setelah userRef di-set, kita mulai memuat data mereka
+    loadUserData();
+}
+
+function loadUserData() {
     userRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            books = data.books ? Object.values(data.books) : defaultState.books;
+            // Pengguna lama, muat data mereka
+            books = data.books ? Object.values(data.books) : [];
             userStats = { ...defaultState.userStats, ...data.userStats };
             missions = { ...defaultState.missions, ...data.missions };
             achievements = { ...defaultState.achievements, ...data.achievements };
@@ -202,30 +141,44 @@ document.addEventListener('DOMContentLoaded', function() {
             userStats = defaultState.userStats;
             missions = defaultState.missions;
             achievements = defaultState.achievements;
-            // Generate misi awal
-            missions.daily.list = ALL_MISSIONS.daily.map(m => ({ ...m, progress: 0, claimed: false }));
-            missions.weekly.list = ALL_MISSIONS.weekly.map(m => ({ ...m, progress: 0, claimed: false }));
-            saveData();
+            // Buat entri awal di database
+            saveData(); 
         }
         
-        checkAndResetSeason();
-        checkAndResetMissions();
-        render(); // Render semua bagian UI
+        // Inisialisasi setelah data siap
+        initializeApp();
+
     }, (error) => {
         console.error("Gagal membaca data dari Firebase:", error);
-        alert("Tidak bisa terhubung ke database.");
+        alert("Tidak bisa terhubung ke database. Cek koneksi internet dan nama Anda.");
     });
+}
 
-    setupEventListeners();
-});
+function initializeApp() {
+    // Sembunyikan login dan tampilkan aplikasi
+    loginModal.classList.add('hidden');
+    appHeader.classList.remove('app-hidden');
+    appMain.classList.remove('app-hidden');
+    currentUserDisplay.textContent = currentUsername;
+
+    // Jalankan fungsi-fungsi penting
+    checkAndResetSeason();
+    checkAndResetMissions();
+    render();
+}
 
 // =================================================================
-// BAGIAN 6: FUNGSI PENYIMPANAN DATA (FIREBASE)
+// BAGIAN 5: FUNGSI PENYIMPANAN DATA (FIREBASE)
 // =================================================================
 async function saveData() {
+    // Pastikan pengguna sudah login sebelum menyimpan
+    if (!userRef) {
+        console.error("Tidak bisa menyimpan: pengguna belum login.");
+        return;
+    }
     try {
         const booksAsObject = books.reduce((obj, book) => {
-            obj[book.id] = book;
+            if (book && book.id) obj[book.id] = book;
             return obj;
         }, {});
 
@@ -241,10 +194,9 @@ async function saveData() {
 }
 
 // =================================================================
-// BAGIAN 7: EVENT LISTENERS (TERMASUK NAVIGASI BARU)
+// BAGIAN 6: EVENT LISTENERS
 // =================================================================
 function setupEventListeners() {
-    // Navigasi Halaman
     mainNav.addEventListener('click', (e) => {
         if (e.target.matches('.nav-link')) {
             e.preventDefault();
@@ -264,15 +216,26 @@ function setupEventListeners() {
     stopSessionBtn.addEventListener('click', handleStopSession);
     saveProgressBtn.addEventListener('click', handleSaveProgress);
     closeModalBtn.addEventListener('click', closeTimerModal);
-
-    // Event listener untuk tombol di halaman dinamis
     document.body.addEventListener('click', handleDynamicClicks);
 }
+
+// Sisa kode dari sini ke bawah sebagian besar tetap sama,
+// jadi Anda bisa menyalin dan menempel seluruh blok ini
+// untuk menggantikan bagian yang relevan di file Anda.
+
+// =================================================================
+// SISA KODE (Fungsi Render, Aksi, Utilitas, dll)
+// Anda dapat menyalin bagian ini dari jawaban sebelumnya
+// atau gunakan yang di bawah ini karena tidak ada perubahan signifikan.
+// =================================================================
+// =================================================================
+// BAGIAN 7: HANDLER UNTUK AKSI DINAMIS & RENDER UI
+// =================================================================
 
 function handleDynamicClicks(e) {
     if (e.target.matches('.claim-mission-btn')) {
         const missionId = e.target.dataset.missionId;
-        const type = e.target.dataset.type;
+        const type = e.target.dataset.type; // 'daily' atau 'weekly'
         handleClaimMission(missionId, type);
     }
     if (e.target.matches('.buy-item-btn')) {
@@ -281,15 +244,9 @@ function handleDynamicClicks(e) {
     }
 }
 
-// =================================================================
-// BAGIAN 8: RENDER SEMUA BAGIAN UI
-// =================================================================
 function render() {
-    // Render bagian yang selalu terlihat
     renderStatsHeader();
-    
-    // Render halaman yang aktif
-    renderBookList(); // Halaman Home
+    renderBookList();
     renderMissions();
     renderAchievements();
     renderShop();
@@ -317,23 +274,25 @@ function renderBookList() {
         bookList.innerHTML = `<div class="empty-state"><h3>📚 No books yet!</h3><p>Add your first book to start tracking.</p></div>`;
         return;
     }
-    books.forEach(book => bookList.appendChild(createBookCard(book)));
+    books.forEach(book => {
+        bookList.appendChild(createBookCard(book));
+    });
 }
 
 function renderMissions() {
     missionsContent.innerHTML = `
         <div class="mission-category">
             <h3>Daily Missions</h3>
-            <div class="mission-list">${missions.daily.list.map(createMissionCard).join('')}</div>
+            <div class="mission-list">${missions.daily.list.map(mission => createMissionCard(mission, 'daily')).join('')}</div>
         </div>
         <div class="mission-category">
             <h3>Weekly Missions</h3>
-            <div class="mission-list">${missions.weekly.list.map(createMissionCard).join('')}</div>
+            <div class="mission-list">${missions.weekly.list.map(mission => createMissionCard(mission, 'weekly')).join('')}</div>
         </div>
     `;
 }
 
-function createMissionCard(mission) {
+function createMissionCard(mission, type) {
     const progress = Math.min((mission.progress / mission.target) * 100, 100);
     const isComplete = progress >= 100;
     return `
@@ -350,13 +309,14 @@ function createMissionCard(mission) {
             </div>
             <button class="btn btn-small claim-mission-btn" 
                 data-mission-id="${mission.id}" 
-                data-type="${mission.type}" 
+                data-type="${type}" 
                 ${!isComplete || mission.claimed ? 'disabled' : ''}>
                 ${mission.claimed ? 'Claimed' : 'Claim'}
             </button>
         </div>
     `;
 }
+
 
 function renderAchievements() {
     achievementsContent.innerHTML = Object.keys(ALL_ACHIEVEMENTS).map(key => {
@@ -419,13 +379,13 @@ function renderProfile() {
             </div>
         </div>
     `;
-    // Update countdown di profil
     updateSeasonCountdown(); 
 }
 
 // =================================================================
-// BAGIAN 9: HANDLER UNTUK AKSI PENGGUNA (BUKU, SESI, DLL)
+// BAGIAN 8: HANDLER UNTUK AKSI PENGGUNA
 // =================================================================
+
 function handleAddBook(e) {
       e.preventDefault();
       const title = document.getElementById('book-title').value.trim();
@@ -444,8 +404,11 @@ function handleAddBook(e) {
 function handleBookListClick(e) {
     const bookId = parseInt(e.target.closest('.book-card')?.dataset.bookId);
     if (!bookId) return;
-    if (e.target.matches('.delete-btn')) handleDeleteBook(bookId);
-    else if (e.target.matches('.start-reading-btn')) handleStartReading(bookId);
+    if (e.target.matches('.delete-btn')) {
+        handleDeleteBook(bookId);
+    } else if (e.target.matches('.start-reading-btn')) {
+        handleStartReading(bookId);
+    }
 }
 
 function handleDeleteBook(bookId) {
@@ -468,6 +431,7 @@ function handleStartReading(bookId) {
     startTimer();
 }
 
+// INI ADALAH FUNGSI YANG DIPERBAIKI
 function handleSaveProgress() {
     const newCurrentPage = parseInt(currentPageInput.value);
     const book = books.find(b => b.id === currentSession.bookId);
@@ -482,37 +446,31 @@ function handleSaveProgress() {
     book.currentPage = newCurrentPage;
     book.totalReadTime += sessionTimeSeconds;
 
-    // Hitung poin dari waktu membaca
     let timePoints = Math.floor(sessionTimeSeconds / 20);
-    // Cek booster
     const doublePointsBooster = userStats.activeBoosters.find(b => b.id === 'double_points_1hr' && b.expires > Date.now());
     if (doublePointsBooster) {
         timePoints *= 2;
         showLevelUpNotification("2x Points Booster Active!");
     }
-
     userStats.totalPoints += timePoints;
     
-    // Cek jika buku selesai
     if (newCurrentPage >= book.totalPages && !wasCompleted) {
         book.isCompleted = true;
         userStats.booksCompleted++;
-        userStats.totalPoints += 50; // Bonus poin
+        userStats.totalPoints += 50;
         showLevelUpNotification("Book completed! +50 bonus points!");
-        updateMissionProgress('complete_book', 1); // Update misi selesaikan buku
+        updateMissionProgress('complete_book', 1);
     }
 
-    // Update progress misi & pencapaian
     updateMissionProgress('time', sessionTimeSeconds);
     updateMissionProgress('session', 1);
     checkAllAchievements();
 
-    // Cek level up
     const oldLevel = userStats.level;
     userStats.level = calculateLevelFromPoints(userStats.totalPoints);
     if (userStats.level > oldLevel) {
         showLevelUpNotification(`Level Up! You're now ${LEVEL_NAMES[userStats.level - 1]}!`);
-        checkAllAchievements(); // Cek lagi jika ada achievement level
+        checkAllAchievements();
     }
     
     saveData();
@@ -521,7 +479,7 @@ function handleSaveProgress() {
 }
 
 // =================================================================
-// BAGIAN 10: LOGIKA BARU (MISI, PENCAPAIAN, TOKO)
+// BAGIAN 9: LOGIKA BARU (MISI, PENCAPAIAN, TOKO)
 // =================================================================
 
 function updateMissionProgress(type, amount) {
@@ -536,7 +494,7 @@ function updateMissionProgress(type, amount) {
 }
 
 function handleClaimMission(missionId, type) {
-    const list = type.startsWith('daily') ? missions.daily.list : missions.weekly.list;
+    const list = type === 'daily' ? missions.daily.list : missions.weekly.list;
     const mission = list.find(m => m.id === missionId);
     
     if (mission && mission.progress >= mission.target && !mission.claimed) {
@@ -544,7 +502,6 @@ function handleClaimMission(missionId, type) {
         mission.claimed = true;
         showLevelUpNotification(`Reward Claimed! +${mission.reward} points.`);
         
-        // Cek level up
         const oldLevel = userStats.level;
         userStats.level = calculateLevelFromPoints(userStats.totalPoints);
         if (userStats.level > oldLevel) {
@@ -560,12 +517,10 @@ function checkAllAchievements() {
     const totalHoursRead = books.reduce((sum, b) => sum + b.totalReadTime, 0) / 3600;
     const booksDone = books.filter(b => b.isCompleted).length;
 
-    // Cek setiap achievement
     if (booksDone >= 1 && !achievements.read_1_book.unlocked) unlockAchievement('read_1_book');
     if (booksDone >= 10 && !achievements.read_10_books.unlocked) unlockAchievement('read_10_books');
     if (totalHoursRead >= 100 && !achievements.read_100_hours.unlocked) unlockAchievement('read_100_hours');
     if (userStats.level >= 10 && !achievements.reach_level_10.unlocked) unlockAchievement('reach_level_10');
-    // ...tambahkan cek achievement lain di sini
 }
 
 function unlockAchievement(id) {
@@ -596,22 +551,17 @@ function handleBuyItem(itemId) {
             showLevelUpNotification(`Purchased ${item.points} points!`);
             break;
         case 'buyMissionSkip':
-            // Logika untuk skip misi bisa ditambahkan di sini
             alert("Mission Skip functionality coming soon!");
-            userStats.coins += item.cost; // Kembalikan koin karena fitur belum siap
+            userStats.coins += item.cost;
             break;
     }
-
     saveData();
     render();
 }
 
 // =================================================================
-// BAGIAN 11: FUNGSI UTILITAS (Timer, Format, Notifikasi, dll - Tidak Banyak Berubah)
+// BAGIAN 10: FUNGSI UTILITAS (Timer, Format, dll.)
 // =================================================================
-// Fungsi-fungsi seperti startTimer, pauseTimer, updateTimer, createBookCard, dll.
-// dapat disalin dari file script.js lama Anda karena tidak banyak berubah.
-// Saya sertakan kembali di sini untuk kelengkapan.
 
 function createBookCard(book) {
       const card = document.createElement('div');
@@ -644,7 +594,9 @@ function startTimer() {
 }
 
 function pauseTimer() {
-    if (currentSession.intervalId) clearInterval(currentSession.intervalId);
+    if (currentSession.intervalId) {
+        clearInterval(currentSession.intervalId);
+    }
     currentSession.isRunning = false;
 }
 
@@ -655,7 +607,9 @@ function resumeTimer() {
 }
 
 function stopTimer() {
-    if (currentSession.intervalId) clearInterval(currentSession.intervalId);
+    if (currentSession.intervalId) {
+        clearInterval(currentSession.intervalId);
+    }
     currentSession.isRunning = false;
 }
 
@@ -713,13 +667,59 @@ function showLevelUpNotification(message) {
     notification.className = 'level-notification';
     notification.textContent = message;
     document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
 }
 
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// =================================================================
+// BAGIAN 11: KALKULASI LEVEL DAN MUSIM
+// =================================================================
+
+function calculateLevelFromPoints(totalPoints) {
+    let level = 1;
+    let pointsUsed = 0;
+    for (let i = 0; i < POINTS_PER_LEVEL.length; i++) {
+        if (totalPoints >= pointsUsed + POINTS_PER_LEVEL[i]) {
+            pointsUsed += POINTS_PER_LEVEL[i];
+            level++;
+        } else { break; }
+    }
+    return Math.min(level, 50);
+}
+  
+function getLevelInfo(totalPoints) {
+    const level = calculateLevelFromPoints(totalPoints);
+    let pointsUsedForCurrentLevel = 0;
+    for (let i = 0; i < level - 1; i++) {
+        pointsUsedForCurrentLevel += POINTS_PER_LEVEL[i] || 0;
+    }
+    const pointsForNextLevel = level < 50 ? (POINTS_PER_LEVEL[level - 1] || 0) : 0;
+    return { currentLevelStartPoints: pointsUsedForCurrentLevel, pointsForNextLevel: pointsForNextLevel };
+}
+
+function checkAndResetSeason() {
+      const now = new Date();
+      const seasonStartDate = new Date(userStats.seasonStartDate);
+      const monthDiff = (now.getFullYear() - seasonStartDate.getFullYear()) * 12 + (now.getMonth() - seasonStartDate.getMonth());
+      if (monthDiff >= 3) {
+          const coinsEarned = userStats.level * 10; 
+          userStats.coins += coinsEarned;
+          showLevelUpNotification(`A new season has begun! You earned ${coinsEarned} coins for reaching level ${userStats.level}. Your progress has been reset.`);
+          
+          userStats.totalPoints = 0;
+          userStats.level = 1;
+          userStats.seasonStartDate = now.toISOString();
+          saveData();
+      }
 }
 
 function updateSeasonCountdown() {
@@ -738,4 +738,24 @@ function updateSeasonCountdown() {
       
       const countdownElementProfile = document.getElementById('season-countdown-profile');
       if(countdownElementProfile) countdownElementProfile.textContent = countdownText;
+}
+
+function checkAndResetMissions() {
+    const now = new Date().getTime();
+    
+    if (!missions.daily) missions.daily = { lastReset: new Date().toISOString(), list: [] };
+    if (!missions.weekly) missions.weekly = { lastReset: new Date().toISOString(), list: [] };
+
+    const lastDailyReset = new Date(missions.daily.lastReset).getTime();
+    const lastWeeklyReset = new Date(missions.weekly.lastReset).getTime();
+    
+    if ((now - lastDailyReset > 24 * 60 * 60 * 1000) || !missions.daily.list.length) {
+        missions.daily.list = ALL_MISSIONS.daily.map(m => ({ ...m, progress: 0, claimed: false }));
+        missions.daily.lastReset = new Date().toISOString();
+    }
+    
+    if ((now - lastWeeklyReset > 7 * 24 * 60 * 60 * 1000) || !missions.weekly.list.length) {
+        missions.weekly.list = ALL_MISSIONS.weekly.map(m => ({ ...m, progress: 0, claimed: false }));
+        missions.weekly.lastReset = new Date().toISOString();
+    }
 }
