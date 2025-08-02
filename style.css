@@ -301,7 +301,6 @@ body {
 .btn-primary {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    margin-top: 10px;
 }
 
 .btn-primary:hover {
@@ -829,6 +828,7 @@ body {
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } 
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+/* Sembunyikan konten utama sebelum login */
 .app-hidden {
     display: none !important;
 }
@@ -836,8 +836,4 @@ body {
 /* Pastikan modal login tidak bisa ditutup dengan klik di luar */
 #login-modal .modal-backdrop {
     pointer-events: none;
-}
-
-#username-input {
-    margin-top: 10px;
 }
