@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="header">
+    <header class="header app-hidden">
         <div class="header-content">
             <h1 class="main-title">📚 Reading Tracker</h1>
             <nav id="main-nav" class="main-nav">
@@ -18,13 +18,13 @@
                 <a href="#profile" class="nav-link">Profile</a>
             </nav>
             <div class="stats-summary">
-                 <div class="stat-item">
-                    <span class="stat-label">Coins</span>
-                    <span id="user-coins" class="stat-value"> 0</span>
+                <div class="stat-item">
+                    <span class="stat-label">Profile Name</span>
+                    <span id="current-user-display" class="stat-value" style="font-size: 1.2rem; color: #667eea;">-</span>
                 </div>
                  <div class="stat-item">
-                    <span class="stat-label">Profile Name</span>
-                    <span id="current-user-display" class="stat-value" style="font-size: 1.2rem; color: #667eea;"> 0</span>
+                    <span class="stat-label">Coins</span>
+                    <span id="user-coins" class="stat-value">🪙 0</span>
                 </div>
                 <div class="level-section">
                     <div class="level-info">
@@ -44,7 +44,7 @@
         </div>
     </header>
 
-    <main class="main-container">
+    <main class="main-container app-hidden">
         <div id="home-view" class="view active">
             <div class="main-content">
                 <section class="add-book-section">
@@ -127,19 +127,19 @@
     </div>
 
     <div id="login-modal" class="modal">
-        <div class="modal-backdrop" style="background: rgba(0, 0, 0, 0.8);"></div>
+        <div class="modal-backdrop" style="background: rgba(0,0,0,0.8);"></div>
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
                 <h3>Welcome to Reading Tracker</h3>
             </div>
             <div class="modal-body">
-                <p style="text-align: center; margin-bottom: 1.5rem; color: #202020;">
+                <p style="text-align: center; margin-bottom: 1.5rem; color: #718096;">
                     Please enter your name to load or start a new profile.
                 </p>
                 <form id="login-form">
                     <div class="form-group">
                         <label for="username-input">Your Name</label>
-                        <input type="text" id="username-input" required placeholder="Sapi Mengeong">
+                        <input type="text" id="username-input" required placeholder="e.g., Budi Sanjaya">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Continue</button>
                 </form>
